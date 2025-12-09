@@ -1,19 +1,13 @@
-from __future__ import annotations
-from dataclasses import dataclass
-from typing import Optional, List
-
-
-@dataclass
 class Node:
-    key: int
-    left: Optional["Node"] = None
-    right: Optional["Node"] = None
+    def __init__(self, key):
+        self.key = key
+        self.left = None
+        self.right = None
 
 
-def insert(root: Optional[Node], key: int) -> Node:
-
+def insert(root, key):
     if root is None:
-        return Node(key=key)
+        return Node(key)
 
     if key < root.key:
         root.left = insert(root.left, key)
@@ -22,8 +16,7 @@ def insert(root: Optional[Node], key: int) -> Node:
     return root
 
 
-def search(root: Optional[Node], key: int) -> Optional[Node]:
-
+def search(root, key):
     current = root
     while current is not None:
         if key == current.key:
@@ -35,15 +28,14 @@ def search(root: Optional[Node], key: int) -> Optional[Node]:
     return None
 
 
-def _find_min(node: Node) -> Node:
+def _find_min(node):
     current = node
     while current.left is not None:
         current = current.left
     return current
 
 
-def delete(root: Optional[Node], key: int) -> Optional[Node]:
-
+def delete(root, key):
     if root is None:
         return None
 
@@ -67,24 +59,19 @@ def delete(root: Optional[Node], key: int) -> Optional[Node]:
     return root
 
 
-def height(root: Optional[Node]) -> int:
-
+def height(root):
     if root is None:
         return 0
     return 1 + max(height(root.left), height(root.right))
 
 
-def inorder_traversal(root: Optional[Node]) -> List[int]:
+def inorder_traversal(root):
     if root is None:
         return []
     return inorder_traversal(root.left) + [root.key] + inorder_traversal(root.right)
 
 
-def is_bst(
-    root: Optional[Node],
-    min_key: Optional[int] = None,
-    max_key: Optional[int] = None,
-) -> bool:
+def is_bst(root, min_key=None, max_key=None):
     if root is None:
         return True
 
@@ -100,10 +87,10 @@ def is_bst(
 
 
 if __name__ == "__main__":
-    
+
     print("CENÁRIO 1 – Exemplo básico")
     valores1 = [50, 30, 70, 20, 40, 60, 80]
-    raiz1: Optional[Node] = None
+    raiz1 = None
     for v in valores1:
         raiz1 = insert(raiz1, v)
 
@@ -118,11 +105,9 @@ if __name__ == "__main__":
     print("Altura após remoção:", height(raiz1))
     print("ABB válida após remoção?", is_bst(raiz1))
     print()
-
-    
     print("CENÁRIO 2 – Inserção em ordem crescente (pior caso)")
     valores2 = [1, 2, 3, 4, 5, 6, 7]
-    raiz2: Optional[Node] = None
+    raiz2 = None
     for v in valores2:
         raiz2 = insert(raiz2, v)
 
@@ -131,8 +116,8 @@ if __name__ == "__main__":
     print("É ABB válida?", is_bst(raiz2))
     print()
 
-    print(" CENÁRIO 3 – Inserção de duplicatas")
-    raiz3: Optional[Node] = None
+    print("CENÁRIO 3 – Inserção de duplicatas")
+    raiz3 = None
     for v in [10, 10, 10, 10]:
         raiz3 = insert(raiz3, v)
 
@@ -141,17 +126,15 @@ if __name__ == "__main__":
     print("É ABB válida?", is_bst(raiz3))
     print()
 
-    print("CENÁRIO 4 – Remoção de folha, 1 filho e 2 filhos ===")
+    print("CENÁRIO 4 – Remoção de folha, 1 filho e 2 filhos")
     valores4 = [50, 30, 70, 20, 40, 60, 80, 35]
-    raiz4: Optional[Node] = None
+    raiz4 = None
     for v in valores4:
         raiz4 = insert(raiz4, v)
     print("In-order inicial:", inorder_traversal(raiz4))
 
     raiz4 = delete(raiz4, 20)
     print("Depois de remover 20:", inorder_traversal(raiz4), "| ABB válida?", is_bst(raiz4))
-
-   
     raiz4 = delete(raiz4, 40)
     print("Depois de remover 40:", inorder_traversal(raiz4), "| ABB válida?", is_bst(raiz4))
 
