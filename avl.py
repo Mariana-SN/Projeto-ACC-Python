@@ -1,51 +1,36 @@
-from __future__ import annotations
-from dataclasses import dataclass
-from typing import Optional, List
+_rotation_count = 0
 
-_rotation_count: int = 0
-
-
-def reset_rotation_count() -> None:
+def reset_rotation_count():
     global _rotation_count
     _rotation_count = 0
 
-
-def get_rotation_count() -> int:
+def get_rotation_count():
     return _rotation_count
 
-
-@dataclass
 class AvlNode:
-    key: int
-    left: Optional["AvlNode"] = None
-    right: Optional["AvlNode"] = None
-    height: int = 1
+    def __init__(self, key):
+        self.key = key
+        self.left = None
+        self.right = None
+        self.height = 1
 
+def _node_height(node):
+    return 0 if node is None else node.height
 
-def _node_height(node: Optional[AvlNode]) -> int:
-    if node is None:
-        return 0
-    return node.height
-
-
-def _update_height(node: AvlNode) -> None:
+def _update_height(node):
     node.height = 1 + max(_node_height(node.left), _node_height(node.right))
 
-
-def _balance_factor(node: Optional[AvlNode]) -> int:
-    if node is None:
-        return 0
+def _balance_factor(node):
     return _node_height(node.left) - _node_height(node.right)
 
-
-def _rotate_right(y: AvlNode) -> AvlNode:
+def _rotate_right(y):
     global _rotation_count
 
     x = y.left
     t2 = x.right if x else None
 
     if x is None:
-        return y 
+        return y
 
     x.right = y
     y.left = t2
@@ -56,15 +41,14 @@ def _rotate_right(y: AvlNode) -> AvlNode:
     _rotation_count += 1
     return x
 
-
-def _rotate_left(x: AvlNode) -> AvlNode:
+def _rotate_left(x):
     global _rotation_count
 
     y = x.right
     t2 = y.left if y else None
 
     if y is None:
-        return x 
+        return x
 
     y.left = x
     x.right = t2
@@ -75,10 +59,9 @@ def _rotate_left(x: AvlNode) -> AvlNode:
     _rotation_count += 1
     return y
 
-
-def insert(root: Optional[AvlNode], key: int) -> AvlNode:
+def insert(root, key):
     if root is None:
-        return AvlNode(key=key)
+        return AvlNode(key)
 
     if key < root.key:
         root.left = insert(root.left, key)
@@ -90,31 +73,28 @@ def insert(root: Optional[AvlNode], key: int) -> AvlNode:
     _update_height(root)
     balance = _balance_factor(root)
 
-    if balance > 1 and key < (root.left.key if root.left else key):
+    if balance > 1 and key < root.left.key:
         return _rotate_right(root)
 
-    if balance < -1 and key > (root.right.key if root.right else key):
+    if balance < -1 and key > root.right.key:
         return _rotate_left(root)
 
-    if balance > 1 and key > (root.left.key if root.left else key):
-        root.left = _rotate_left(root.left) 
+    if balance > 1 and key > root.left.key:
+        root.left = _rotate_left(root.left)
         return _rotate_right(root)
 
-    if balance < -1 and key < (root.right.key if root.right else key):
+    if balance < -1 and key < root.right.key:
         root.right = _rotate_right(root.right)
         return _rotate_left(root)
 
     return root
 
+def _find_min(node):
+    while node.left is not None:
+        node = node.left
+    return node
 
-def _find_min(node: AvlNode) -> AvlNode:
-    current = node
-    while current.left is not None:
-        current = current.left
-    return current
-
-
-def delete(root: Optional[AvlNode], key: int) -> Optional[AvlNode]:
+def delete(root, key):
     if root is None:
         return None
 
@@ -151,34 +131,26 @@ def delete(root: Optional[AvlNode], key: int) -> Optional[AvlNode]:
 
     return root
 
-
-def search(root: Optional[AvlNode], key: int) -> Optional[AvlNode]:
+def search(root, key):
     current = root
-    while current is not None:
+    while current:
         if key == current.key:
             return current
-        if key < current.key:
+        elif key < current.key:
             current = current.left
         else:
             current = current.right
     return None
 
-
-def height(root: Optional[AvlNode]) -> int:
+def height(root):
     return _node_height(root)
 
-
-def inorder_traversal(root: Optional[AvlNode]) -> List[int]:
+def inorder_traversal(root):
     if root is None:
         return []
     return inorder_traversal(root.left) + [root.key] + inorder_traversal(root.right)
 
-
-def is_bst(
-    root: Optional[AvlNode],
-    min_key: Optional[int] = None,
-    max_key: Optional[int] = None,
-) -> bool:
+def is_bst(root, min_key=None, max_key=None):
     if root is None:
         return True
 
@@ -192,23 +164,33 @@ def is_bst(
         and is_bst(root.right, root.key, max_key)
     )
 
+def print_tree(node, level=0, prefix=""):
+    if node is not None:
+        print_tree(node.right, level + 1, "    ")
+        print(prefix * level + str(node.key))
+        print_tree(node.left, level + 1, "    ")
 
 if __name__ == "__main__":
     valores = [50, 30, 70, 20, 40, 60, 80, 10, 25, 35, 45]
-    raiz: Optional[AvlNode] = None
+    raiz = None
     reset_rotation_count()
 
     for v in valores:
         raiz = insert(raiz, v)
 
-    print("In-order AVL:", inorder_traversal(raiz))
+    print("Valores em ordem:", inorder_traversal(raiz))
     print("Altura AVL :", height(raiz))
     print("É árvore de busca?", is_bst(raiz))
     print("Rotações nas inserções:", get_rotation_count())
 
+    print("\nÁrvore AVL após inserções:")
+    print_tree(raiz)
+
     for chave in [20, 30, 50]:
         raiz = delete(raiz, chave)
 
-    print("Após remoções:", inorder_traversal(raiz))
+    print("\nValores em ordem após remoções:", inorder_traversal(raiz))
+    print("\nÁrvore AVL após deleções:")
+    print_tree(raiz)
     print("Altura final:", height(raiz))
     print("ABB/AVL válida?", is_bst(raiz))
