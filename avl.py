@@ -97,11 +97,11 @@ def insert(root: Optional[AvlNode], key: int) -> AvlNode:
         return _rotate_left(root)
 
     if balance > 1 and key > (root.left.key if root.left else key):
-        root.left = _rotate_left(root.left)  # type: ignore
+        root.left = _rotate_left(root.left) 
         return _rotate_right(root)
 
     if balance < -1 and key < (root.right.key if root.right else key):
-        root.right = _rotate_right(root.right)  # type: ignore
+        root.right = _rotate_right(root.right)
         return _rotate_left(root)
 
     return root
@@ -139,14 +139,14 @@ def delete(root: Optional[AvlNode], key: int) -> Optional[AvlNode]:
         return _rotate_right(root)
 
     if balance > 1 and _balance_factor(root.left) < 0:
-        root.left = _rotate_left(root.left)  # type: ignore
+        root.left = _rotate_left(root.left)
         return _rotate_right(root)
 
     if balance < -1 and _balance_factor(root.right) <= 0:
         return _rotate_left(root)
 
     if balance < -1 and _balance_factor(root.right) > 0:
-        root.right = _rotate_right(root.right)  # type: ignore
+        root.right = _rotate_right(root.right)
         return _rotate_left(root)
 
     return root
