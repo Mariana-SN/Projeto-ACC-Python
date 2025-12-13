@@ -2,7 +2,11 @@ import sys
 import time
 import random
 
-from abb import insert, search, delete, height
+from abb import insert as abb_insert, search as abb_search, delete as abb_delete, height as abb_height
+import avl
+from hash_open import OpenAddressHashTable
+from hash_chaining import HashTableChaining
+
 from datasets import (
     gerar_aleatorio,
     gerar_ordenado,
@@ -15,30 +19,100 @@ sys.setrecursionlimit(300_000)
 
 class ABBWrapper:
 
-
     def __init__(self):
         self.root = None
 
-    def insert(self, key):
-        self.root = insert(self.root, key)
+    def insert(self, key: int) -> None:
+        self.root = abb_insert(self.root, key)
 
-    def search(self, key):
-        return search(self.root, key) is not None
+    def search(self, key: int) -> bool:
+        return abb_search(self.root, key) is not None
 
-    def delete(self, key):
-        self.root = delete(self.root, key)
+    def delete(self, key: int) -> None:
+        self.root = abb_delete(self.root, key)
 
-    def height(self):
-        return height(self.root)
+    def extra_metrics(self) -> dict:
+        return {
+            "altura_final": abb_height(self.root),
+        }
+
+
+class AVLWrapper:
+
+    def __init__(self):
+        self.root = None
+        if hasattr(avl, "reset_rotation_count"):
+            avl.reset_rotation_count()
+
+    def insert(self, key: int) -> None:
+        self.root = avl.insert(self.root, key)
+
+    def search(self, key: int) -> bool:
+        return avl.search(self.root, key) is not None
+
+    def delete(self, key: int) -> None:
+        self.root = avl.delete(self.root, key)
+
+    def extra_metrics(self) -> dict:
+        metrics = {
+            "altura_final": avl.height(self.root),
+        }
+        if hasattr(avl, "get_rotation_count"):
+            metrics["rotacoes"] = avl.get_rotation_count()
+        return metrics
+
+
+class HashOpenWrapper:
+
+    def __init__(self, size: int, method: str):
+        self.table = OpenAddressHashTable(size=size, method=method)
+
+    def insert(self, key: int) -> None:
+        self.table.insert(key)
+
+    def search(self, key: int) -> bool:
+        return self.table.search(key)
+
+    def delete(self, key: int) -> None:
+        self.table.remove(key)
+
+    def extra_metrics(self) -> dict:
+        return {
+            "tamanho_tabela": self.table.size,
+            "fator_de_carga": round(self.table.load_factor(), 3),
+            "colisoes_totais": self.table.collision_count,
+        }
+
+
+class HashChainingWrapper:
+
+    def __init__(self, size: int):
+        self.table = HashTableChaining(size=size, debug=False)
+
+    def insert(self, key: int) -> None:
+        self.table.insert(key)
+
+    def search(self, key: int) -> bool:
+        return self.table.search(key)
+
+    def delete(self, key: int) -> None:
+        self.table.remove(key)
+
+    def extra_metrics(self) -> dict:
+        return {
+            "tamanho_tabela": self.table.size,
+            "colisoes_totais": self.table.collision_count,
+        }
+
 
 
 def executar_benchmark_estrutura(
-    nome_estrutura,
+    nome_estrutura: str,
     fabrica,
-    chaves_base,
-    m,
-    k,
-):
+    chaves_base: list[int],
+    m: int,
+    k: int,
+) -> dict:
 
     n = len(chaves_base)
     estrutura = fabrica()
@@ -63,44 +137,62 @@ def executar_benchmark_estrutura(
     tempo_remocao_total = time.perf_counter() - inicio
     tempo_remocao_medio = tempo_remocao_total / k
 
-    altura_final = estrutura.height()
-
-    return {
+    resultado = {
         "estrutura": nome_estrutura,
-        "n": n,
         "tempo_medio_insercao": tempo_insercao_medio,
         "tempo_medio_busca": tempo_busca_medio,
         "tempo_medio_remocao": tempo_remocao_medio,
-        "altura_final": altura_final,
     }
+    resultado.update(estrutura.extra_metrics())
+    return resultado
+
+
+def imprimir_resultado(r: dict) -> None:
+    """Imprime as métricas de forma legível no terminal."""
+    print(f"\nEstrutura: {r['estrutura']}")
+    print(f"  Tempo médio inserção: {r['tempo_medio_insercao']:.6e} s")
+    print(f"  Tempo médio busca   : {r['tempo_medio_busca']:.6e} s")
+    print(f"  Tempo médio remoção : {r['tempo_medio_remocao']:.6e} s")
+
+    if "altura_final" in r:
+        print(f"  Altura final        : {r['altura_final']}")
+    if "rotacoes" in r:
+        print(f"  Rotações            : {r['rotacoes']}")
+    if "tamanho_tabela" in r:
+        print(f"  Tamanho da tabela   : {r['tamanho_tabela']}")
+    if "fator_de_carga" in r:
+        print(f"  Fator de carga      : {r['fator_de_carga']}")
+    if "colisoes_totais" in r:
+        print(f"  Colisões totais     : {r['colisoes_totais']}")
+    print()
+
 
 
 def main():
+    N = 25_000          
+    M = N               
+    K = N // 10         
     random.seed(42)
 
-    configuracoes = [
-        ("aleatorio", gerar_aleatorio, 50_000),
-        ("ordenado", gerar_ordenado, 30_000),
-        ("quase_ordenado", gerar_quase_ordenado, 50_000),
-    ]
+    tamanho_tabela_hash = N * 2
 
-    estruturas = {
-        "ABB": lambda: ABBWrapper(),
+    datasets = {
+        "aleatorio": gerar_aleatorio(N),
+        "ordenado": gerar_ordenado(N),
+        "quase_ordenado": gerar_quase_ordenado(N),
     }
 
-    resultados = []
+    estruturas_arvores = {
+        "ABB": lambda: ABBWrapper(),
+        "AVL": lambda: AVLWrapper(),
+    }
 
-    for nome_dataset, gerador, N in configuracoes:
-        M = N        
-        K = N // 10   
-
-        chaves = gerador(N)
-
+    for nome_dataset, chaves in datasets.items():
         print("\n====================================")
         print(f"DATASET: {nome_dataset}  (N={N}, M={M}, K={K})")
         print("====================================")
 
-        for nome_estrutura, fabrica in estruturas.items():
+        for nome_estrutura, fabrica in estruturas_arvores.items():
             r = executar_benchmark_estrutura(
                 nome_estrutura=nome_estrutura,
                 fabrica=fabrica,
@@ -108,26 +200,29 @@ def main():
                 m=M,
                 k=K,
             )
-            r["dataset"] = nome_dataset
-            resultados.append(r)
+            imprimir_resultado(r)
 
-            print(f"\nEstrutura: {r['estrutura']}")
-            print(f"  Tempo médio inserção: {r['tempo_medio_insercao']:.6e} s")
-            print(f"  Tempo médio busca   : {r['tempo_medio_busca']:.6e} s")
-            print(f"  Tempo médio remoção : {r['tempo_medio_remocao']:.6e} s")
-            print(f"  Altura final        : {r['altura_final']}")
-
-    print("\n==================== RESUMO SIMPLES ====================")
-    print("dataset        |     N | altura | t_ins | t_bus | t_rem (médios, em s)")
-    for r in resultados:
-        print(
-            f"{r['dataset']:<13} | "
-            f"{r['n']:>5} | "
-            f"{r['altura_final']:>6} | "
-            f"{r['tempo_medio_insercao']:.2e} | "
-            f"{r['tempo_medio_busca']:.2e} | "
-            f"{r['tempo_medio_remocao']:.2e}"
+        r = executar_benchmark_estrutura(
+            nome_estrutura="Hash (encadeamento externo)",
+            fabrica=lambda: HashChainingWrapper(size=tamanho_tabela_hash),
+            chaves_base=chaves,
+            m=M,
+            k=K,
         )
+        imprimir_resultado(r)
+
+        for metodo in ("linear", "quadratic", "double"):
+            r = executar_benchmark_estrutura(
+                nome_estrutura=f"Hash (open addressing, {metodo})",
+                fabrica=lambda m=metodo: HashOpenWrapper(
+                    size=tamanho_tabela_hash,
+                    method=m,
+                ),
+                chaves_base=chaves,
+                m=M,
+                k=K,
+            )
+            imprimir_resultado(r)
 
 
 if __name__ == "__main__":

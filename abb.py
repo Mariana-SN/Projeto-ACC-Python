@@ -72,6 +72,7 @@ def inorder_traversal(root):
 
 
 def is_bst(root, min_key=None, max_key=None):
+    
     if root is None:
         return True
 
@@ -86,8 +87,16 @@ def is_bst(root, min_key=None, max_key=None):
     )
 
 
-if __name__ == "__main__":
+def print_tree(root, level=0, branch="*"):
+    if root is None:
+        return
 
+    print_tree(root.right, level + 1, "dir")
+    print("    " * level + f"{branch}-- {root.key}")
+    print_tree(root.left, level + 1, "esq")
+
+
+if __name__ == "__main__":
     print("CENÁRIO 1 – Exemplo básico")
     valores1 = [50, 30, 70, 20, 40, 60, 80]
     raiz1 = None
@@ -100,11 +109,17 @@ if __name__ == "__main__":
     print("Busca 40:", search(raiz1, 40) is not None)
     print("Busca 100:", search(raiz1, 100) is not None)
 
+    print("\nÁrvore (CENÁRIO 1):")
+    print_tree(raiz1)
+
     raiz1 = delete(raiz1, 70)
-    print("In-order após remover 70:", inorder_traversal(raiz1))
+    print("\nIn-order após remover 70:", inorder_traversal(raiz1))
     print("Altura após remoção:", height(raiz1))
     print("ABB válida após remoção?", is_bst(raiz1))
+    print("Árvore após remoção de 70:")
+    print_tree(raiz1)
     print()
+
     print("CENÁRIO 2 – Inserção em ordem crescente (pior caso)")
     valores2 = [1, 2, 3, 4, 5, 6, 7]
     raiz2 = None
@@ -114,6 +129,8 @@ if __name__ == "__main__":
     print("In-order:", inorder_traversal(raiz2))
     print("Altura (esperado 7):", height(raiz2))
     print("É ABB válida?", is_bst(raiz2))
+    print("\nÁrvore (pior caso, parecendo lista):")
+    print_tree(raiz2)
     print()
 
     print("CENÁRIO 3 – Inserção de duplicatas")
@@ -124,6 +141,8 @@ if __name__ == "__main__":
     print("In-order (apenas um 10):", inorder_traversal(raiz3))
     print("Altura:", height(raiz3))
     print("É ABB válida?", is_bst(raiz3))
+    print("Árvore (duplicatas ignoradas):")
+    print_tree(raiz3)
     print()
 
     print("CENÁRIO 4 – Remoção de folha, 1 filho e 2 filhos")
@@ -132,13 +151,19 @@ if __name__ == "__main__":
     for v in valores4:
         raiz4 = insert(raiz4, v)
     print("In-order inicial:", inorder_traversal(raiz4))
+    print("Árvore inicial:")
+    print_tree(raiz4)
 
     raiz4 = delete(raiz4, 20)
-    print("Depois de remover 20:", inorder_traversal(raiz4), "| ABB válida?", is_bst(raiz4))
+    print("\nDepois de remover 20:", inorder_traversal(raiz4), "| ABB válida?", is_bst(raiz4))
+    print_tree(raiz4)
+
     raiz4 = delete(raiz4, 40)
-    print("Depois de remover 40:", inorder_traversal(raiz4), "| ABB válida?", is_bst(raiz4))
+    print("\nDepois de remover 40:", inorder_traversal(raiz4), "| ABB válida?", is_bst(raiz4))
+    print_tree(raiz4)
 
     raiz4 = delete(raiz4, 50)
-    print("Depois de remover 50:", inorder_traversal(raiz4), "| ABB válida?", is_bst(raiz4))
-
+    print("\nDepois de remover 50:", inorder_traversal(raiz4), "| ABB válida?", is_bst(raiz4))
     print("Altura final:", height(raiz4))
+    print("Árvore final:")
+    print_tree(raiz4)
