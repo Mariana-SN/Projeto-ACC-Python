@@ -194,7 +194,7 @@ def salvar_resultados_csv(resultados: list, caminho: str) -> None:
 
 
 def main():
-    N = 25_000
+    N = 25_000   #MUDAR AQ O VALOR PARA TESTAR
     M = N
     K = N // 10
     random.seed(42)
