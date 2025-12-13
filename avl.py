@@ -89,10 +89,10 @@ def insert(root, key):
 
     return root
 
-def _find_min(node):
-    while node.left is not None:
-        node = node.left
-    return node
+def _find_min(root):
+    while root.left is not None:
+        root = root.left
+    return root
 
 def delete(root, key):
     if root is None:
@@ -164,11 +164,14 @@ def is_bst(root, min_key=None, max_key=None):
         and is_bst(root.right, root.key, max_key)
     )
 
-def print_tree(node, level=0, prefix=""):
-    if node is not None:
-        print_tree(node.right, level + 1, "    ")
-        print(prefix * level + str(node.key))
-        print_tree(node.left, level + 1, "    ")
+def print_tree(root, level=0, branch="*"):
+    if root is None:
+        return
+    
+    print_tree(root.right, level + 1, "dir")
+    print("    " * level + f"{branch}-- {root.key}")
+    print_tree(root.left, level + 1, "esq")
+
 
 if __name__ == "__main__":
     valores = [50, 30, 70, 20, 40, 60, 80, 10, 25, 35, 45]

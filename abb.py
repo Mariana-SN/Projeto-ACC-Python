@@ -4,7 +4,6 @@ class Node:
         self.left = None
         self.right = None
 
-
 def insert(root, key):
     if root is None:
         return Node(key)
@@ -14,7 +13,6 @@ def insert(root, key):
     elif key > root.key:
         root.right = insert(root.right, key)
     return root
-
 
 def search(root, key):
     current = root
@@ -27,13 +25,11 @@ def search(root, key):
             current = current.right
     return None
 
-
 def _find_min(node):
     current = node
     while current.left is not None:
         current = current.left
     return current
-
 
 def delete(root, key):
     if root is None:
@@ -58,18 +54,15 @@ def delete(root, key):
 
     return root
 
-
 def height(root):
     if root is None:
         return 0
     return 1 + max(height(root.left), height(root.right))
 
-
 def inorder_traversal(root):
     if root is None:
         return []
     return inorder_traversal(root.left) + [root.key] + inorder_traversal(root.right)
-
 
 def is_bst(root, min_key=None, max_key=None):
     
@@ -86,7 +79,6 @@ def is_bst(root, min_key=None, max_key=None):
         and is_bst(root.right, root.key, max_key)
     )
 
-
 def print_tree(root, level=0, branch="*"):
     if root is None:
         return
@@ -94,7 +86,6 @@ def print_tree(root, level=0, branch="*"):
     print_tree(root.right, level + 1, "dir")
     print("    " * level + f"{branch}-- {root.key}")
     print_tree(root.left, level + 1, "esq")
-
 
 if __name__ == "__main__":
     print("CENÁRIO 1 – Exemplo básico")

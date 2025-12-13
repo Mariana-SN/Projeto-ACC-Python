@@ -59,7 +59,7 @@ class HashTableChaining:
         index = self._hash(key)
         bucket = self.table[index]
 
-        self._log(f"[BUSCAR] Quero saber se a chave {key} está na tabela.")
+        self._log(f"[BUSCAR] Quero saber se a chave {key} está na tabela")
         self._log(f"Ela deveria estar na posição {index}.")
         self._log(f"Conteúdo dessa posição: {bucket}")
 
@@ -80,8 +80,8 @@ class HashTableChaining:
         index = self._hash(key)
         bucket = self.table[index]
 
-        self._log(f"[REMOVER] Quero remover a chave {key}.")
-        self._log(f"Espera-se que esteja na posição {index}.")
+        self._log(f"[REMOVER] Quero remover a chave {key}")
+        self._log(f"Espera-se que esteja na posição {index}")
         self._log(f"Conteúdo da posição antes: {bucket}")
 
         for i, element in enumerate(bucket):
@@ -90,7 +90,7 @@ class HashTableChaining:
                 del bucket[i]
                 self.count -= 1
                 self.remove_times.append(time.perf_counter() - start)
-                self._log("Chave encontrada e removida.")
+                self._log("Chave encontrada e removida")
                 self._log(f"Conteúdo dessa posição DEPOIS: {bucket}")
                 return True
 

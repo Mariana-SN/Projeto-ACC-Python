@@ -147,7 +147,6 @@ def executar_benchmark_estrutura(
 
 
 def imprimir_resultado(r: dict) -> None:
-    """Imprime as métricas na tela, como já fazia antes."""
     print(f"\nEstrutura: {r['estrutura']}")
     print(f"  Tempo médio inserção: {r['tempo_medio_insercao']:.6e} s")
     print(f"  Tempo médio busca   : {r['tempo_medio_busca']:.6e} s")
@@ -194,7 +193,7 @@ def salvar_resultados_csv(resultados: list, caminho: str) -> None:
 
 
 def main():
-    N = 25_000   #MUDAR AQ O VALOR PARA TESTAR
+    N = 25_000  #MUDAR AQUI O VALOR PARA TESTAR EX.: 5_000 (CINCO MIL), 10_000 (DEZ MIL)
     M = N
     K = N // 10
     random.seed(42)
@@ -252,6 +251,7 @@ def main():
             m=M,
             k=K,
         )
+
         imprimir_resultado(r)
         resultados_csv.append({
             "dataset": nome_dataset,
@@ -271,7 +271,7 @@ def main():
 
         for metodo in ("linear", "quadratic", "double"):
             r = executar_benchmark_estrutura(
-                nome_estrutura=f"Hash (open addressing, {metodo})",
+                nome_estrutura=f"Hash (enderecamento aberto, {metodo})",
                 fabrica=lambda m=metodo: HashOpenWrapper(
                     size=tamanho_tabela_hash,
                     method=m,
@@ -280,6 +280,7 @@ def main():
                 m=M,
                 k=K,
             )
+
             imprimir_resultado(r)
             resultados_csv.append({
                 "dataset": nome_dataset,
