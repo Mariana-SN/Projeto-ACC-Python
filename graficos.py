@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 
 ARQUIVO_CSV = "resultados_benchmark.csv"
 
-
 def carregar_dados():
     dados = []
     with open(ARQUIVO_CSV, newline="", encoding="utf-8") as f:
@@ -23,28 +22,34 @@ def carregar_dados():
 
 
 def grafico_barras_simples(dados, campo, dataset, nome_arquivo, titulo_y):
-
     filtrados = [d for d in dados if d["dataset"] == dataset and d[campo] is not None]
+
+    if not filtrados:
+        return
 
     estruturas = [d["estrutura"] for d in filtrados]
     valores = [d[campo] for d in filtrados]
 
+    min_val = min(v for v in valores if v > 0)
+    max_val = max(valores)
+    usar_log = min_val > 0 and (max_val / min_val) >= 100
+
+    titulo_y_plot = titulo_y + (" (escala log)" if usar_log else "")
+
     plt.figure()
     plt.bar(estruturas, valores)
     plt.xticks(rotation=45, ha="right")
-    plt.ylabel(titulo_y)
-    plt.title(f"{titulo_y} – dataset {dataset}")
+    plt.ylabel(titulo_y_plot)
+    plt.title(f"{titulo_y_plot} – dataset {dataset}")
+    if usar_log:
+        plt.yscale("log")
     plt.tight_layout()
     plt.savefig(nome_arquivo)
     plt.close()
 
 
 def grafico_altura_arvores(dados, nome_arquivo):
-    """
-    Compara a altura final de ABB e AVL por dataset.
-    Usa escala logarítmica no eixo Y para que a ABB (muito alta em dados ordenados)
-    e a AVL (altura pequena) apareçam juntas de forma legível.
-    """
+
     datasets = sorted(set(d["dataset"] for d in dados))
     estruturas = ["ABB", "AVL"]
 
@@ -71,7 +76,7 @@ def grafico_altura_arvores(dados, nome_arquivo):
             plt.plot(xs, ys, marker="o", label=estrutura)
 
     plt.ylabel("Altura da árvore (escala log)")
-    plt.yscale("log") 
+    plt.yscale("log")
     plt.title("Altura final de ABB e AVL por dataset")
     plt.legend()
     plt.tight_layout()
@@ -80,12 +85,14 @@ def grafico_altura_arvores(dados, nome_arquivo):
 
 
 def grafico_colisoes_hash(dados, dataset, nome_arquivo):
-
     filtrados = [
         d
         for d in dados
         if d["dataset"] == dataset and d["colisoes_totais"] is not None
     ]
+
+    if not filtrados:
+        return
 
     estruturas = [d["estrutura"] for d in filtrados]
     valores = [d["colisoes_totais"] for d in filtrados]
@@ -101,10 +108,12 @@ def grafico_colisoes_hash(dados, dataset, nome_arquivo):
 
 
 def grafico_rotacoes_avl(dados, nome_arquivo):
-
     filtrados = [
         d for d in dados if d["estrutura"] == "AVL" and d["rotacoes"] is not None
     ]
+
+    if not filtrados:
+        return
 
     datasets = [d["dataset"] for d in filtrados]
     valores = [d["rotacoes"] for d in filtrados]
