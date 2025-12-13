@@ -1,6 +1,7 @@
 import sys
 import time
 import random
+import csv 
 
 from abb import insert as abb_insert, search as abb_search, delete as abb_delete, height as abb_height
 import avl
@@ -15,7 +16,6 @@ from datasets import (
 )
 
 sys.setrecursionlimit(300_000)
-
 
 class ABBWrapper:
 
@@ -105,7 +105,6 @@ class HashChainingWrapper:
         }
 
 
-
 def executar_benchmark_estrutura(
     nome_estrutura: str,
     fabrica,
@@ -148,7 +147,7 @@ def executar_benchmark_estrutura(
 
 
 def imprimir_resultado(r: dict) -> None:
-    """Imprime as métricas de forma legível no terminal."""
+    """Imprime as métricas na tela, como já fazia antes."""
     print(f"\nEstrutura: {r['estrutura']}")
     print(f"  Tempo médio inserção: {r['tempo_medio_insercao']:.6e} s")
     print(f"  Tempo médio busca   : {r['tempo_medio_busca']:.6e} s")
@@ -167,14 +166,40 @@ def imprimir_resultado(r: dict) -> None:
     print()
 
 
+def salvar_resultados_csv(resultados: list, caminho: str) -> None:
+    fieldnames = [
+        "dataset",
+        "estrutura",
+        "N",
+        "M",
+        "K",
+        "tempo_medio_insercao",
+        "tempo_medio_busca",
+        "tempo_medio_remocao",
+        "altura_final",
+        "rotacoes",
+        "tamanho_tabela",
+        "fator_de_carga",
+        "colisoes_totais",
+    ]
+
+    with open(caminho, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for r in resultados:
+            writer.writerow(r)
+
+    print(f"\nResultados salvos em: {caminho}")
+
+
 
 def main():
-    N = 25_000          
-    M = N               
-    K = N // 10         
+    N = 25_000
+    M = N
+    K = N // 10
     random.seed(42)
 
-    tamanho_tabela_hash = N * 2
+    tamanho_tabela_hash = N * 2  
 
     datasets = {
         "aleatorio": gerar_aleatorio(N),
@@ -186,6 +211,8 @@ def main():
         "ABB": lambda: ABBWrapper(),
         "AVL": lambda: AVLWrapper(),
     }
+
+    resultados_csv = []
 
     for nome_dataset, chaves in datasets.items():
         print("\n====================================")
@@ -202,6 +229,22 @@ def main():
             )
             imprimir_resultado(r)
 
+            resultados_csv.append({
+                "dataset": nome_dataset,
+                "estrutura": r["estrutura"],
+                "N": N,
+                "M": M,
+                "K": K,
+                "tempo_medio_insercao": r["tempo_medio_insercao"],
+                "tempo_medio_busca": r["tempo_medio_busca"],
+                "tempo_medio_remocao": r["tempo_medio_remocao"],
+                "altura_final": r.get("altura_final", ""),
+                "rotacoes": r.get("rotacoes", ""),
+                "tamanho_tabela": r.get("tamanho_tabela", ""),
+                "fator_de_carga": r.get("fator_de_carga", ""),
+                "colisoes_totais": r.get("colisoes_totais", ""),
+            })
+
         r = executar_benchmark_estrutura(
             nome_estrutura="Hash (encadeamento externo)",
             fabrica=lambda: HashChainingWrapper(size=tamanho_tabela_hash),
@@ -210,6 +253,21 @@ def main():
             k=K,
         )
         imprimir_resultado(r)
+        resultados_csv.append({
+            "dataset": nome_dataset,
+            "estrutura": r["estrutura"],
+            "N": N,
+            "M": M,
+            "K": K,
+            "tempo_medio_insercao": r["tempo_medio_insercao"],
+            "tempo_medio_busca": r["tempo_medio_busca"],
+            "tempo_medio_remocao": r["tempo_medio_remocao"],
+            "altura_final": "",
+            "rotacoes": "",
+            "tamanho_tabela": r.get("tamanho_tabela", ""),
+            "fator_de_carga": "",
+            "colisoes_totais": r.get("colisoes_totais", ""),
+        })
 
         for metodo in ("linear", "quadratic", "double"):
             r = executar_benchmark_estrutura(
@@ -223,6 +281,23 @@ def main():
                 k=K,
             )
             imprimir_resultado(r)
+            resultados_csv.append({
+                "dataset": nome_dataset,
+                "estrutura": r["estrutura"],
+                "N": N,
+                "M": M,
+                "K": K,
+                "tempo_medio_insercao": r["tempo_medio_insercao"],
+                "tempo_medio_busca": r["tempo_medio_busca"],
+                "tempo_medio_remocao": r["tempo_medio_remocao"],
+                "altura_final": "",
+                "rotacoes": "",
+                "tamanho_tabela": r.get("tamanho_tabela", ""),
+                "fator_de_carga": r.get("fator_de_carga", ""),
+                "colisoes_totais": r.get("colisoes_totais", ""),
+            })
+
+    salvar_resultados_csv(resultados_csv, "resultados_benchmark.csv")
 
 
 if __name__ == "__main__":
