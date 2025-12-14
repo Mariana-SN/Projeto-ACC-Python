@@ -155,12 +155,13 @@ if __name__ == "__main__":
 
     grafico_altura_arvores(dados, "altura_arvores.png")
 
-    grafico_colisoes_hash(
+    for ds in ("aleatorio", "ordenado", "quase_ordenado"):
+        grafico_colisoes_hash(
         dados,
-        dataset="aleatorio",
-        nome_arquivo="colisoes_hash_aleatorio.png",
+        dataset=ds,
+        nome_arquivo=f"colisoes_hash_{ds}.png",
     )
-
+        
     grafico_rotacoes_avl(dados, "rotacoes_avl.png")
 
     print("Arquivos dos gráficos gerados na pasta do projeto.")
