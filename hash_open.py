@@ -144,7 +144,7 @@ class OpenAddressHashTable:
         }
 
     def print_table(self):
-        print("\nTabela Hash (Enderecamento aberto):")
+        print("\nTabela Hash (Endereçamento aberto):")
         for i, item in enumerate(self.table):
             if item is None:
                 print(f"{i}: vazio")
@@ -154,7 +154,7 @@ class OpenAddressHashTable:
                 print(f"{i}: {item}")
 
 def print_report(report):
-        print("\nMetricas da tabela Hash (Enderecamento aberto):")
+        print("\nMetricas da tabela Hash (Endereçamento aberto):")
         print(f"Tamanho da tabela:     {report['tamanho_tabela']}")
         print(f"Fator de carga:        {report['fator_de_carga']}")
         print(f"Colisões totais:       {report['colisoes_totais']}")
